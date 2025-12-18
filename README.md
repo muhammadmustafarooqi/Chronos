@@ -1,16 +1,81 @@
-# React + Vite
+# ⌚ CHRONOS | Luxury Watch Store
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+![CHRONOS Header](https://images.unsplash.com/photo-1614164185128-e4ec99c436d7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80)
 
-Currently, two official plugins are available:
+**CHRONOS** is a state-of-the-art, premium e-commerce platform dedicated to high-end timepieces. Built with **React**, **Tailwind CSS v4**, and **Framer Motion**, it delivers an unparalleled luxury shopping experience with a focus on aesthetics, performance, and modern web standards.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## ✨ Key Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 🎨 Premium Design System
+- **Luxury Aesthetic**: A curated palette of Gold (#D4AF37), Charcoal, and White for a high-end feel.
+- **Micro-interactions**: Smooth hover effects, shimmer loading states, and parallax mouse movements.
+- **Glassmorphism**: Elegant translucent UI elements using advanced CSS backdrops.
 
-## Expanding the ESLint configuration
+### 🌓 Advanced Theming
+- **Intelligent Modes**: Full support for both **Light** and **Dark** themes.
+- **Circular Reveal Animation**: A stunning visual transition that radiates from the user's click point using the modern **View Transitions API**.
+- **System Preference Detection**: Automatically respects user OS settings while allowing persistence via `localStorage`.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### 🛍️ Comprehensive E-commerce Suite
+- **Dynamic Catalog**: A curated collection of 20 iconic watches with categorized filtering (Luxury, Sport, Diver, Pilot, etc.).
+- **Smart Search**: Real-time modal-based search functionality.
+- **Cart & Wishlist**: Fully functional local persistence for shopping lists and carts.
+- **Seamless Checkout**: Multi-step checkout flow with validation and order summary.
+- **Full Authentication**: Ready-to-use Login and Signup flows with local state management.
+
+### 📱 Responsive & Performant
+- **Mobile First**: Optimized layouts for every screen size, from smaller smartphones to 4K monitors.
+- **Fast Performance**: Optimized image loading with skeletons and Vite-powered efficiency.
+
+---
+
+## 🛠️ Tech Stack
+
+- **Framework**: [React 18+](https://reactjs.org/)
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
+- **Animations**: [Framer Motion](https://www.framer.com/motion/) & [Lucide Icons](https://lucide.dev/)
+- **Build Tool**: [Vite](https://vitejs.dev/)
+- **Router**: [React Router DOM v6](https://reactrouter.com/)
+- **Context API**: Global state for Auth, Cart, Wishlist, and Theme.
+
+---
+
+## 🚀 Getting Started
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/muhammadmustafarooqi/Chronos.git
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Run the development server**
+   ```bash
+   npm run dev
+   ```
+
+4. **Build for production**
+   ```bash
+   npm run build
+   ```
+
+---
+
+## 📂 Project Structure
+
+- `src/components`: Reusable UI components (Navbar, Footer, ProductCard, etc.).
+- `src/context`: React Context providers for global state.
+- `src/data`: Centralized product data (watches.js).
+- `src/pages`: Main application views (Home, Shop, ProductDetails, Checkout, etc.).
+- `src/index.css`: Custom CSS variables and Tailwind utility overrides.
+
+---
+
+## ⚖️ License
+
+Created for demonstration and education purposes. Designed with excellence by Antigravity AI.
