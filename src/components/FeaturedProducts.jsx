@@ -71,7 +71,7 @@ const FeaturedProducts = () => {
                                 {/* Image */}
                                 <div className="relative aspect-[3/4] overflow-hidden">
                                     <img
-                                        src={watch.image}
+                                        src={watch.images ? watch.images[0] : watch.image}
                                         alt={watch.name}
                                         className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
                                     />
@@ -92,14 +92,14 @@ const FeaturedProducts = () => {
                                 </div>
 
                                 {/* Content */}
-                                <div className="absolute bottom-0 left-0 right-0 p-6 text-center">
-                                    <span className="text-luxury-gold text-[10px] uppercase tracking-[0.2em] mb-2 block">
+                                <div className="absolute bottom-0 left-0 right-0 p-6 text-center z-10">
+                                    <span className="text-luxury-gold text-[10px] uppercase tracking-[0.2em] mb-2 block font-bold">
                                         {watch.brand}
                                     </span>
-                                    <h3 className="text-xl font-serif text-white mb-2 group-hover:text-luxury-gold transition-colors">
+                                    <h3 className="text-xl font-serif text-white mb-2 group-hover:text-luxury-gold transition-colors text-shadow-sm">
                                         {watch.name}
                                     </h3>
-                                    <p className="text-gray-400 text-lg font-light">
+                                    <p className="text-white text-lg font-light">
                                         ${watch.price.toLocaleString()}
                                     </p>
                                 </div>

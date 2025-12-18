@@ -93,7 +93,7 @@ const Wishlist = () => {
                                     {/* Image */}
                                     <div className="relative aspect-[4/5] overflow-hidden">
                                         <img
-                                            src={item.image}
+                                            src={item.images ? item.images[0] : item.image}
                                             alt={item.name}
                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                         />

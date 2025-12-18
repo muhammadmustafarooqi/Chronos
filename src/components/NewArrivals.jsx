@@ -55,7 +55,7 @@ const NewArrivals = () => {
                             <Link to={`/product/${watch.id}`}>
                                 <div className="relative overflow-hidden aspect-[4/5] mb-4">
                                     <img
-                                        src={watch.image}
+                                        src={watch.images ? watch.images[0] : watch.image}
                                         alt={watch.name}
                                         className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
                                     />

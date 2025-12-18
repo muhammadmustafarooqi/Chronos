@@ -17,6 +17,8 @@ const ProductDetails = () => {
     const [quantity, setQuantity] = useState(1);
     const [activeTab, setActiveTab] = useState('description');
 
+    const [selectedImage, setSelectedImage] = useState(0);
+
     useEffect(() => {
         setLoading(true);
         window.scrollTo(0, 0);
@@ -25,6 +27,7 @@ const ProductDetails = () => {
         setLoading(false);
         setQuantity(1);
         setIsAdded(false);
+        setSelectedImage(0);
     }, [id]);
 
     const handleAddToCart = () => {
@@ -59,43 +62,52 @@ const ProductDetails = () => {
         );
     }
 
+    const images = product.images || [product.image];
+
     return (
         <div className="bg-luxury-black min-h-screen">
             {/* Breadcrumb */}
             <div className="bg-luxury-charcoal border-b border-white/5">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                    <div className="flex items-center gap-2 text-sm">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-4 lg:pt-4">
+                    <div className="flex items-center gap-2 text-sm overflow-x-auto whitespace-nowrap scrollbar-hide">
                         <Link to="/" className="text-gray-500 hover:text-white transition-colors">Home</Link>
-                        <ChevronRight size={14} className="text-gray-600" />
+                        <ChevronRight size={14} className="text-gray-600 flex-shrink-0" />
                         <Link to="/shop" className="text-gray-500 hover:text-white transition-colors">Collection</Link>
-                        <ChevronRight size={14} className="text-gray-600" />
-                        <span className="text-luxury-gold">{product.name}</span>
+                        <ChevronRight size={14} className="text-gray-600 flex-shrink-0" />
+                        <span className="text-luxury-gold truncate">{product.name}</span>
                     </div>
                 </div>
             </div>
 
             {/* Product Section */}
-            <section className="py-12 lg:py-20">
+            <section className="py-8 lg:py-20">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
-                        {/* Image */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-20">
+                        {/* Image Gallery */}
                         <motion.div
                             initial={{ opacity: 0, x: -30 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.6 }}
-                            className="relative"
+                            className="space-y-4"
                         >
-                            <div className="aspect-square lg:aspect-[4/5] bg-luxury-charcoal overflow-hidden relative group">
-                                <img
-                                    src={product.image}
-                                    alt={product.name}
-                                    className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
-                                />
+                            <div className="aspect-square bg-luxury-charcoal overflow-hidden relative group rounded-sm border border-white/5">
+                                <AnimatePresence mode="wait">
+                                    <motion.img
+                                        key={selectedImage}
+                                        src={images[selectedImage]}
+                                        alt={product.name}
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        transition={{ duration: 0.4 }}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </AnimatePresence>
 
                                 {/* Badges */}
                                 <div className="absolute top-4 left-4 flex flex-col gap-2">
                                     {product.isNew && (
-                                        <span className="bg-luxury-gold text-luxury-black text-xs font-bold uppercase tracking-wider px-3 py-1">
+                                        <span className="bg-luxury-gold text-luxury-black text-[10px] font-bold uppercase tracking-wider px-3 py-1">
                                             New
                                         </span>
                                     )}
@@ -105,22 +117,29 @@ const ProductDetails = () => {
                                 <div className="absolute top-4 right-4 flex flex-col gap-2">
                                     <button
                                         onClick={() => toggleWishlist(product)}
-                                        className={`p-3 backdrop-blur-sm transition-all ${isInWishlist(product.id)
+                                        className={`p-3 backdrop-blur-md transition-all rounded-full ${isInWishlist(product.id)
                                             ? 'bg-luxury-gold text-luxury-black'
                                             : 'bg-black/50 text-white hover:bg-luxury-gold hover:text-luxury-black'
                                             }`}
                                     >
                                         <Heart size={18} className={isInWishlist(product.id) ? 'fill-current' : ''} />
                                     </button>
-                                    <button className="p-3 bg-black/50 backdrop-blur-sm text-white hover:bg-white hover:text-black transition-all">
-                                        <Share2 size={18} />
-                                    </button>
                                 </div>
                             </div>
 
-                            {/* Corner Decoration */}
-                            <div className="absolute -bottom-4 -right-4 w-32 h-32 border border-luxury-gold/20 -z-10" />
-                            <div className="absolute -top-4 -left-4 w-32 h-32 border border-luxury-gold/20 -z-10" />
+                            {/* Thumbnails */}
+                            <div className="grid grid-cols-4 gap-4">
+                                {images.map((img, idx) => (
+                                    <button
+                                        key={idx}
+                                        onClick={() => setSelectedImage(idx)}
+                                        className={`aspect-square rounded-sm overflow-hidden border-2 transition-all ${selectedImage === idx ? 'border-luxury-gold opacity-100' : 'border-transparent opacity-50 hover:opacity-80'
+                                            }`}
+                                    >
+                                        <img src={img} alt={`${product.name} angle ${idx + 1}`} className="w-full h-full object-cover" />
+                                    </button>
+                                ))}
+                            </div>
                         </motion.div>
 
                         {/* Info */}

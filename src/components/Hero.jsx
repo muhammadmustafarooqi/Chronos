@@ -105,7 +105,7 @@ const Hero = () => {
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, delay: 0.5 }}
-                    className="text-5xl md:text-7xl lg:text-8xl font-serif font-bold text-white mb-4 leading-[0.9]"
+                    className="text-4xl sm:text-7xl lg:text-8xl font-serif font-bold text-white mb-4 leading-tight sm:leading-[0.9]"
                 >
                     Master the
                 </motion.h1>
@@ -114,7 +114,7 @@ const Hero = () => {
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, delay: 0.7 }}
-                    className="text-5xl md:text-7xl lg:text-8xl font-serif font-bold mb-8 leading-[0.9]"
+                    className="text-4xl sm:text-7xl lg:text-8xl font-serif font-bold mb-8 leading-tight sm:leading-[0.9]"
                 >
                     <span className="text-gradient-gold text-shadow-gold">Art of Time</span>
                 </motion.h1>
@@ -149,7 +149,7 @@ const Hero = () => {
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, delay: 1.3 }}
-                    className="mt-20 grid grid-cols-3 gap-8 max-w-xl mx-auto"
+                    className="mt-12 sm:mt-20 grid grid-cols-3 gap-4 sm:gap-8 max-w-xl mx-auto"
                 >
                     {[
                         { value: '500+', label: 'Timepieces' },
@@ -157,8 +157,8 @@ const Hero = () => {
                         { value: '15K+', label: 'Happy Clients' },
                     ].map((stat, index) => (
                         <div key={index} className="text-center">
-                            <div className="text-2xl md:text-3xl font-serif text-white mb-1">{stat.value}</div>
-                            <div className="text-xs text-gray-500 uppercase tracking-wider">{stat.label}</div>
+                            <div className="text-xl sm:text-3xl font-serif text-white mb-1">{stat.value}</div>
+                            <div className="text-[9px] sm:text-xs text-gray-500 uppercase tracking-wider">{stat.label}</div>
                         </div>
                     ))}
                 </motion.div>

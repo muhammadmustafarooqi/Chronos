@@ -114,44 +114,48 @@ const Shop = () => {
 
             {/* Filters Section - Always Visible */}
             <section className="sticky top-[72px] z-30 bg-luxury-charcoal/95 backdrop-blur-xl border-y border-white/5">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-6">
                     {/* Filter Pills Row */}
-                    <div className="flex flex-wrap items-center gap-3 mb-4">
-                        {/* Category Pills */}
-                        <div className="flex items-center gap-2 flex-wrap">
-                            {categories.map(cat => (
-                                <button
-                                    key={cat}
-                                    onClick={() => setSelectedCategory(cat)}
-                                    className={`px-4 py-2 text-sm font-medium transition-all duration-300 ${selectedCategory === cat
+                    <div className="relative">
+                        <div className="flex items-center gap-3 mb-4 overflow-x-auto scrollbar-hide pb-2 lg:pb-0 scroll-smooth">
+                            {/* Category Pills */}
+                            <div className="flex items-center gap-2 whitespace-nowrap">
+                                {categories.map(cat => (
+                                    <button
+                                        key={cat}
+                                        onClick={() => setSelectedCategory(cat)}
+                                        className={`px-4 py-2 text-xs lg:text-sm font-medium transition-all duration-300 ${selectedCategory === cat
                                             ? 'bg-luxury-gold text-luxury-black'
                                             : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-white/10'
-                                        }`}
-                                >
-                                    {cat}
-                                </button>
-                            ))}
+                                            }`}
+                                    >
+                                        {cat}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
+                        {/* Right Fade Indicator */}
+                        <div className="absolute right-0 top-0 bottom-2 w-12 bg-gradient-to-l from-luxury-charcoal to-transparent pointer-events-none lg:hidden" />
                     </div>
 
                     {/* Second Row - Brand, Price, Sort */}
                     <div className="flex flex-wrap items-center justify-between gap-4">
-                        <div className="flex flex-wrap items-center gap-3">
+                        <div className="flex flex-wrap items-center gap-2 lg:gap-3">
                             {/* Brand Dropdown */}
                             <div className="relative group">
-                                <button className="flex items-center gap-2 px-4 py-2.5 bg-white/5 border border-white/10 text-white text-sm hover:border-luxury-gold/50 transition-colors">
-                                    <span className="text-gray-500">Brand:</span>
+                                <button className="flex items-center gap-2 px-3 lg:px-4 py-2 lg:py-2.5 bg-white/5 border border-white/10 text-white text-[10px] lg:text-sm hover:border-luxury-gold/50 transition-colors">
+                                    <span className="text-gray-500 hidden sm:inline">Brand:</span>
                                     <span>{selectedBrand}</span>
-                                    <ChevronDown size={14} className="text-gray-500" />
+                                    <ChevronDown size={12} className="text-gray-500" />
                                 </button>
-                                <div className="absolute top-full left-0 mt-1 w-48 bg-luxury-black border border-white/10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 max-h-64 overflow-y-auto">
+                                <div className="absolute top-full left-0 mt-1 w-48 bg-luxury-black border border-white/10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 max-h-64 overflow-y-auto shadow-2xl">
                                     {brands.map(brand => (
                                         <button
                                             key={brand}
                                             onClick={() => setSelectedBrand(brand)}
-                                            className={`block w-full text-left px-4 py-2.5 text-sm transition-colors ${selectedBrand === brand
-                                                    ? 'bg-luxury-gold/10 text-luxury-gold'
-                                                    : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                                            className={`block w-full text-left px-4 py-2 lg:py-2.5 text-xs lg:text-sm transition-colors ${selectedBrand === brand
+                                                ? 'bg-luxury-gold/10 text-luxury-gold'
+                                                : 'text-gray-400 hover:bg-white/5 hover:text-white'
                                                 }`}
                                         >
                                             {brand}
@@ -162,19 +166,19 @@ const Shop = () => {
 
                             {/* Price Dropdown */}
                             <div className="relative group">
-                                <button className="flex items-center gap-2 px-4 py-2.5 bg-white/5 border border-white/10 text-white text-sm hover:border-luxury-gold/50 transition-colors">
-                                    <span className="text-gray-500">Price:</span>
+                                <button className="flex items-center gap-2 px-3 lg:px-4 py-2 lg:py-2.5 bg-white/5 border border-white/10 text-white text-[10px] lg:text-sm hover:border-luxury-gold/50 transition-colors">
+                                    <span className="text-gray-500 hidden sm:inline">Price:</span>
                                     <span>{priceRanges.find(p => p.value === priceRange)?.label}</span>
-                                    <ChevronDown size={14} className="text-gray-500" />
+                                    <ChevronDown size={12} className="text-gray-500" />
                                 </button>
-                                <div className="absolute top-full left-0 mt-1 w-48 bg-luxury-black border border-white/10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                                <div className="absolute top-full left-0 mt-1 w-48 bg-luxury-black border border-white/10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 shadow-2xl">
                                     {priceRanges.map(range => (
                                         <button
                                             key={range.value}
                                             onClick={() => setPriceRange(range.value)}
-                                            className={`block w-full text-left px-4 py-2.5 text-sm transition-colors ${priceRange === range.value
-                                                    ? 'bg-luxury-gold/10 text-luxury-gold'
-                                                    : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                                            className={`block w-full text-left px-4 py-2 lg:py-2.5 text-xs lg:text-sm transition-colors ${priceRange === range.value
+                                                ? 'bg-luxury-gold/10 text-luxury-gold'
+                                                : 'text-gray-400 hover:bg-white/5 hover:text-white'
                                                 }`}
                                         >
                                             {range.label}
@@ -185,19 +189,19 @@ const Shop = () => {
 
                             {/* Sort Dropdown */}
                             <div className="relative group">
-                                <button className="flex items-center gap-2 px-4 py-2.5 bg-white/5 border border-white/10 text-white text-sm hover:border-luxury-gold/50 transition-colors">
-                                    <span className="text-gray-500">Sort:</span>
+                                <button className="flex items-center gap-2 px-3 lg:px-4 py-2 lg:py-2.5 bg-white/5 border border-white/10 text-white text-[10px] lg:text-sm hover:border-luxury-gold/50 transition-colors">
+                                    <span className="text-gray-500 hidden sm:inline">Sort:</span>
                                     <span>{sortOptions.find(s => s.value === sortBy)?.label}</span>
-                                    <ChevronDown size={14} className="text-gray-500" />
+                                    <ChevronDown size={12} className="text-gray-500" />
                                 </button>
-                                <div className="absolute top-full left-0 mt-1 w-48 bg-luxury-black border border-white/10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                                <div className="absolute top-full right-0 lg:left-0 mt-1 w-48 bg-luxury-black border border-white/10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 shadow-2xl">
                                     {sortOptions.map(option => (
                                         <button
                                             key={option.value}
                                             onClick={() => setSortBy(option.value)}
-                                            className={`block w-full text-left px-4 py-2.5 text-sm transition-colors ${sortBy === option.value
-                                                    ? 'bg-luxury-gold/10 text-luxury-gold'
-                                                    : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                                            className={`block w-full text-left px-4 py-2 lg:py-2.5 text-xs lg:text-sm transition-colors ${sortBy === option.value
+                                                ? 'bg-luxury-gold/10 text-luxury-gold'
+                                                : 'text-gray-400 hover:bg-white/5 hover:text-white'
                                                 }`}
                                         >
                                             {option.label}
@@ -261,8 +265,8 @@ const Shop = () => {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     {filteredProducts.length > 0 ? (
                         <div className={`grid gap-6 ${gridCols === 2
-                                ? 'grid-cols-1 md:grid-cols-2'
-                                : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+                            ? 'grid-cols-1 md:grid-cols-2'
+                            : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
                             }`}>
                             {filteredProducts.map((product, index) => (
                                 <ProductCard key={product.id} product={product} index={index} />

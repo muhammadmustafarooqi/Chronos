@@ -93,7 +93,7 @@ const Brands = () => {
                                                     >
                                                         <div className="aspect-square bg-luxury-charcoal overflow-hidden mb-3">
                                                             <img
-                                                                src={product.image}
+                                                                src={product.images ? product.images[0] : product.image}
                                                                 alt={product.name}
                                                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                                             />

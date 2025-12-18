@@ -331,6 +331,41 @@ html.light {
     background: #D4AF37;
   }
 
+  /* Utility Classes */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Mobile Typography Adjustments */
+  @media (max-width: 640px) {
+    h1 {
+      @apply text-3xl;
+    }
+
+    h2 {
+      @apply text-2xl;
+    }
+
+    .btn-primary,
+    .btn-outline {
+      @apply px-6 py-3 text-xs;
+    }
+  }
+
+  /* Aspect Ratio Fallbacks */
+  .aspect-square {
+    aspect-ratio: 1 / 1;
+  }
+
+  .aspect-\[4\/5\] {
+    aspect-ratio: 4 / 5;
+  }
+
   /* View Transitions API - Circular Reveal */
   ::view-transition-old(root),
   ::view-transition-new(root) {

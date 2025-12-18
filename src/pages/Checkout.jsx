@@ -180,8 +180,8 @@ const Checkout = () => {
                             <React.Fragment key={s.num}>
                                 <div className="flex items-center gap-2 sm:gap-3">
                                     <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-medium transition-colors ${step >= s.num
-                                            ? 'bg-luxury-gold text-luxury-black'
-                                            : 'bg-white/10 text-gray-500'
+                                        ? 'bg-luxury-gold text-luxury-black'
+                                        : 'bg-white/10 text-gray-500'
                                         }`}>
                                         {step > s.num ? <Check size={14} /> : s.num}
                                     </div>
@@ -399,8 +399,8 @@ const Checkout = () => {
                                         {/* Cash on Delivery */}
                                         <label
                                             className={`block p-4 sm:p-6 border transition-all ${paymentMethod === 'cod'
-                                                    ? 'border-luxury-gold bg-luxury-gold/5'
-                                                    : 'border-white/10 hover:border-white/30'
+                                                ? 'border-luxury-gold bg-luxury-gold/5'
+                                                : 'border-white/10 hover:border-white/30'
                                                 }`}
                                         >
                                             <div className="flex items-center gap-3 sm:gap-4">
@@ -494,7 +494,7 @@ const Checkout = () => {
                                     <div key={item.id} className="flex gap-3 sm:gap-4">
                                         <div className="w-14 h-18 sm:w-16 sm:h-20 bg-luxury-charcoal overflow-hidden flex-shrink-0">
                                             <img
-                                                src={item.image}
+                                                src={item.images ? item.images[0] : item.image}
                                                 alt={item.name}
                                                 className="w-full h-full object-cover"
                                             />

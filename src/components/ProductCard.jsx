@@ -43,7 +43,7 @@ const ProductCard = ({ product, index = 0 }) => {
                 )}
 
                 <img
-                    src={product.image}
+                    src={product.images ? product.images[0] : product.image}
                     alt={product.name}
                     onLoad={() => setImageLoaded(true)}
                     className={`w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out ${imageLoaded ? 'opacity-100' : 'opacity-0'
