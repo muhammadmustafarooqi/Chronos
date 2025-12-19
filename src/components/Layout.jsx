@@ -5,7 +5,7 @@ import CartDrawer from './CartDrawer';
 
 const Layout = ({ children }) => {
     return (
-        <div className="min-h-screen flex flex-col bg-luxury-black text-white">
+        <div className="min-h-screen flex flex-col bg-luxury-black text-white overflow-x-hidden">
             <Navbar />
             <main className="flex-grow">
                 {children}

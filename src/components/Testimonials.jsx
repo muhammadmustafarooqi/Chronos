@@ -37,7 +37,7 @@ const Testimonials = () => {
         <section className="py-28 bg-luxury-charcoal relative overflow-hidden">
             {/* Background Pattern */}
             <div className="absolute inset-0 bg-grid-pattern opacity-20" />
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-radial-gold opacity-20" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full md:w-[800px] h-[400px] bg-radial-gold opacity-20" />
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
                 {/* Section Header */}
