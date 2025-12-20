@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 const Navbar = () => {
     const { setIsCartOpen, cartCount } = useCart();
     const { wishlistCount } = useWishlist();
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, user } = useAuth();
     const { isDark, toggleTheme } = useTheme();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
@@ -33,9 +33,9 @@ const Navbar = () => {
         { path: '/', label: 'Home' },
         { path: '/shop', label: 'Collection' },
         { path: '/brands', label: 'Brands' },
+        { path: '/admin', label: 'Dashboard', adminOnly: true },
         { path: '/about', label: 'Our Story' },
-        { path: '/contact', label: 'Contact' },
-    ];
+    ].filter(link => !link.adminOnly || user?.isAdmin);
 
     return (
         <>

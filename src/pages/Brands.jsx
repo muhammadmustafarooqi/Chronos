@@ -1,9 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { getBrands, watches } from '../data/watches';
+import { useWatches } from '../context/WatchContext';
 
 const Brands = () => {
+    const { watches, getBrands } = useWatches();
     const brandList = getBrands().filter(b => b !== 'All');
 
     const getBrandProducts = (brand) => watches.filter(w => w.brand === brand);

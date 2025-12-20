@@ -1,10 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { getNewArrivals } from '../data/watches';
+import { useWatches } from '../context/WatchContext';
 import { ArrowRight, Sparkles } from 'lucide-react';
 
 const NewArrivals = () => {
+    const { getNewArrivals } = useWatches();
     const newWatches = getNewArrivals();
 
     if (newWatches.length === 0) return null;

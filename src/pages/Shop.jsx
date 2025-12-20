@@ -1,11 +1,12 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { watches, getCategories, getBrands } from '../data/watches';
+import { useWatches } from '../context/WatchContext';
 import ProductCard from '../components/ProductCard';
 import { motion } from 'framer-motion';
 import { X, ChevronDown, Grid, LayoutGrid, Sparkles } from 'lucide-react';
 
 const Shop = () => {
+    const { watches, getCategories, getBrands } = useWatches();
     const [searchParams] = useSearchParams();
     const categoryParam = searchParams.get('category');
     const brandParam = searchParams.get('brand');

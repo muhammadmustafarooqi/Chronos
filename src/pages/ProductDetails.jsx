@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { watches } from '../data/watches';
+import { useWatches } from '../context/WatchContext';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -9,6 +9,7 @@ import ProductCard from '../components/ProductCard';
 
 const ProductDetails = () => {
     const { id } = useParams();
+    const { watches } = useWatches();
     const { addToCart } = useCart();
     const { isInWishlist, toggleWishlist } = useWishlist();
     const [product, setProduct] = useState(null);
@@ -28,7 +29,7 @@ const ProductDetails = () => {
         setQuantity(1);
         setIsAdded(false);
         setSelectedImage(0);
-    }, [id]);
+    }, [id, watches]);
 
     const handleAddToCart = () => {
         for (let i = 0; i < quantity; i++) {

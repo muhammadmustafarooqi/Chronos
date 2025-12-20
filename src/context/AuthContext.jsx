@@ -52,9 +52,22 @@ export const AuthProvider = ({ children }) => {
     };
 
     const login = (email, password) => {
+        // Hardcoded admin check
+        if (email === 'admin@gmail.com' && password === 'Admin123@') {
+            const adminUser = {
+                id: 'admin',
+                name: 'System Admin',
+                email: 'admin@gmail.com',
+                role: 'admin',
+                isAdmin: true
+            };
+            setUser(adminUser);
+            return { success: true, message: 'Admin login successful' };
+        }
+
         const foundUser = users.find(u => u.email === email && u.password === password);
         if (foundUser) {
-            setUser(foundUser);
+            setUser({ ...foundUser, isAdmin: false });
             return { success: true, message: 'Login successful' };
         }
         return { success: false, message: 'Invalid email or password' };

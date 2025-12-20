@@ -1,10 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { getFeaturedWatches } from '../data/watches';
+import { useWatches } from '../context/WatchContext';
 import { ArrowRight, Star } from 'lucide-react';
 
 const FeaturedProducts = () => {
+    const { getFeaturedWatches } = useWatches();
     const featuredWatches = getFeaturedWatches();
 
     return (

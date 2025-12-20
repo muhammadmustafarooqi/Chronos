@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../context/CartContext';
+import { useOrders } from '../context/OrderContext';
+import { useCustomers } from '../context/CustomerContext';
+import { useAuth } from '../context/AuthContext';
 import {
     ChevronRight,
     Truck,
@@ -18,6 +21,9 @@ import {
 const Checkout = () => {
     const navigate = useNavigate();
     const { cart, cartTotal, clearCart } = useCart();
+    const { addOrder } = useOrders();
+    const { addCustomer, customers } = useCustomers();
+    const { user } = useAuth();
     const [step, setStep] = useState(1);
     const [isProcessing, setIsProcessing] = useState(false);
     const [orderPlaced, setOrderPlaced] = useState(false);
@@ -36,6 +42,20 @@ const Checkout = () => {
         country: 'United States',
     });
 
+    // Pre-fill user data
+    React.useEffect(() => {
+        if (user && !shippingData.email) {
+            const nameToSplit = user.name || (user.email ? user.email.split('@')[0] : 'Guest');
+            const names = nameToSplit.split(' ');
+            setShippingData(prev => ({
+                ...prev,
+                firstName: names[0] || '',
+                lastName: names.slice(1).join(' ') || '',
+                email: user.email || ''
+            }));
+        }
+    }, [user]);
+
     const [paymentMethod, setPaymentMethod] = useState('cod');
 
     const handleShippingChange = (e) => {
@@ -53,7 +73,45 @@ const Checkout = () => {
 
         // Simulate order processing
         setTimeout(() => {
-            const orderId = 'CHR-' + Date.now().toString().slice(-8);
+            const orderId = 'ORD-' + Date.now().toString().slice(-4);
+            const customerName = `${shippingData.firstName} ${shippingData.lastName}`.trim() || 'Guest Customer';
+
+            // Save to OrderContext
+            const newOrder = {
+                id: orderId,
+                customerId: user?.id || Date.now(),
+                customerName: customerName,
+                email: shippingData.email,
+                items: cart.map(item => ({
+                    id: item.id,
+                    name: item.name,
+                    quantity: item.quantity,
+                    price: item.price,
+                    image: item.images ? item.images[0] : item.image
+                })),
+                totalAmount: cartTotal,
+                status: 'Pending',
+                date: new Date().toISOString(),
+                shippingAddress: `${shippingData.address}, ${shippingData.city}, ${shippingData.state} ${shippingData.zipCode}`
+            };
+
+            addOrder(newOrder);
+
+            // Add as customer in CustomerContext if not exists
+            const existingCustomer = customers.find(c => c.email.toLowerCase() === shippingData.email.toLowerCase());
+            if (!existingCustomer) {
+                addCustomer({
+                    id: user?.id || Date.now(),
+                    name: customerName,
+                    email: shippingData.email,
+                    phone: shippingData.phone,
+                    joinedDate: new Date().toISOString().split('T')[0],
+                    totalOrders: 1,
+                    totalSpend: cartTotal,
+                    status: 'Active'
+                });
+            }
+
             setOrderNumber(orderId);
             setIsProcessing(false);
             setOrderPlaced(true);
