@@ -21,7 +21,7 @@ const Home = () => {
             <section className="py-28 bg-luxury-black relative overflow-hidden">
                 {/* Background */}
                 <div className="absolute inset-0">
-                    <div className="absolute top-0 right-0 w-1/2 h-full">
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 max-w-[calc(100%-400px)] w-full flex items-center justify-center h-full">
                         <img
                             src="https://images.unsplash.com/photo-1509941943102-10c232535736?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80"
                             alt="Watchmaking"
@@ -32,7 +32,7 @@ const Home = () => {
                 </div>
 
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                    <div className="max-w-2xl">
+                    <div className="max-w-2xl pl-12">
                         <motion.div
                             initial={{ opacity: 0, y: 30 }}
                             whileInView={{ opacity: 1, y: 0 }}
@@ -46,12 +46,12 @@ const Home = () => {
                                 The Art of <br />
                                 <span className="text-gradient-gold">Watchmaking</span>
                             </h2>
-                            <p className="text-gray-400 leading-relaxed mb-6 text-lg">
+                            <p className="text-gray-400 leading-relaxed mb-6 text-lg mr-18">
                                 For over a decade, CHRONOS has been the premier destination for luxury timepieces.
                                 We believe that a watch is more than just a tool to tell time—it is a statement of style,
                                 a piece of history, and a work of art.
                             </p>
-                            <p className="text-gray-400 leading-relaxed mb-8">
+                            <p className="text-gray-400 leading-relaxed mb-8 mr-16">
                                 Our collection is meticulously curated to ensure authenticity and quality.
                                 From the intricate movements of Patek Philippe to the robust elegance of Rolex,
                                 we offer only the finest timepieces for distinguished collectors.
