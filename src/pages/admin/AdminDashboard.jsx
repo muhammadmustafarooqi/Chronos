@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
     Users,
@@ -8,21 +8,44 @@ import {
     TrendingUp,
     ArrowUpRight,
     ArrowDownRight,
-    Trash2
+    Trash2,
+    RefreshCw
 } from 'lucide-react';
 import { useWatches } from '../../context/WatchContext';
 import { useOrders } from '../../context/OrderContext';
 import { useCustomers } from '../../context/CustomerContext';
+import api from '../../services/api';
 
 const AdminDashboard = () => {
     const { watches } = useWatches();
-    const { orders } = useOrders();
-    const { customers } = useCustomers();
+    const { orders, refreshOrders } = useOrders();
+    const { customers, refreshCustomers } = useCustomers();
+    const [dashboardData, setDashboardData] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-    const totalRevenue = orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
-    const totalOrders = orders.length;
-    const totalCustomers = customers.length;
-    const liveInventory = watches.length;
+    // Fetch dashboard stats from API
+    useEffect(() => {
+        const fetchDashboard = async () => {
+            try {
+                const response = await api.admin.getDashboard();
+                setDashboardData(response.data);
+            } catch (error) {
+                console.error('Error fetching dashboard:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchDashboard();
+    }, []);
+
+    // Use API data or fallback to context data
+    const totalRevenue = dashboardData?.stats?.totalRevenue ||
+        orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+    const totalOrders = dashboardData?.stats?.totalOrders || orders.length;
+    const totalCustomers = dashboardData?.stats?.totalCustomers || customers.length;
+    const liveInventory = dashboardData?.stats?.totalProducts || watches.length;
+
+    const recentOrdersData = dashboardData?.recentOrders || orders.slice(0, 4);
 
     const stats = [
         {
@@ -59,6 +82,20 @@ const AdminDashboard = () => {
         },
     ];
 
+    const handleRefresh = async () => {
+        setLoading(true);
+        try {
+            const response = await api.admin.getDashboard();
+            setDashboardData(response.data);
+            await refreshOrders?.();
+            await refreshCustomers?.();
+        } catch (error) {
+            console.error('Error refreshing:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="space-y-8">
             <div className="flex items-center justify-between">
@@ -67,12 +104,20 @@ const AdminDashboard = () => {
                     <p className="text-gray-400">Welcome back, here's what's happening today.</p>
                 </div>
                 <div className="flex gap-4">
+                    <button
+                        onClick={handleRefresh}
+                        disabled={loading}
+                        className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg hover:border-luxury-gold/50 transition-colors flex items-center gap-2"
+                    >
+                        <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+                        Refresh
+                    </button>
                     <button className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg hover:border-luxury-gold/50 transition-colors">
                         Download Report
                     </button>
                     <button
                         onClick={() => {
-                            if (window.confirm('This will clear all local orders, customers, and inventory. Are you sure?')) {
+                            if (window.confirm('This will clear all local cache data. Are you sure?')) {
                                 localStorage.clear();
                                 window.location.reload();
                             }
@@ -80,7 +125,7 @@ const AdminDashboard = () => {
                         className="px-4 py-2 bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg hover:bg-red-500/20 transition-colors flex items-center gap-2 text-xs"
                     >
                         <Trash2 size={14} />
-                        Clear System Cache
+                        Clear Cache
                     </button>
                     <button className="btn-primary py-2 px-6 rounded-lg text-xs">
                         Add New Watch
@@ -114,7 +159,7 @@ const AdminDashboard = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Sale Chart Placeholder */}
+                {/* Sale Chart */}
                 <div className="lg:col-span-2 p-8 bg-luxury-black border border-white/5 rounded-2xl">
                     <div className="flex items-center justify-between mb-8">
                         <h2 className="text-xl font-serif font-bold text-white">Sales Analytics</h2>
@@ -124,21 +169,30 @@ const AdminDashboard = () => {
                         </select>
                     </div>
                     <div className="h-[300px] w-full flex items-end justify-between gap-4">
-                        {[40, 70, 45, 90, 65, 85, 55].map((height, i) => (
-                            <div key={i} className="flex-1 flex flex-col items-center gap-4 group">
-                                <motion.div
-                                    initial={{ height: 0 }}
-                                    animate={{ height: `${height}%` }}
-                                    transition={{ duration: 1, delay: i * 0.1 }}
-                                    className="w-full bg-gradient-to-t from-luxury-gold/20 via-luxury-gold/50 to-luxury-gold rounded-t-lg relative group-hover:brightness-125 transition-all"
-                                >
-                                    <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-white text-luxury-black text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                                        ${height}k
-                                    </div>
-                                </motion.div>
-                                <span className="text-xs text-gray-500">Day {i + 1}</span>
-                            </div>
-                        ))}
+                        {(dashboardData?.revenueByDay || [
+                            { revenue: 40000 }, { revenue: 70000 }, { revenue: 45000 },
+                            { revenue: 90000 }, { revenue: 65000 }, { revenue: 85000 }, { revenue: 55000 }
+                        ]).slice(-7).map((day, i) => {
+                            const maxRevenue = Math.max(...(dashboardData?.revenueByDay?.map(d => d.revenue) || [90000]));
+                            const height = maxRevenue > 0 ? (day.revenue / maxRevenue) * 100 : 0;
+                            return (
+                                <div key={i} className="flex-1 flex flex-col items-center gap-4 group">
+                                    <motion.div
+                                        initial={{ height: 0 }}
+                                        animate={{ height: `${Math.max(height, 5)}%` }}
+                                        transition={{ duration: 1, delay: i * 0.1 }}
+                                        className="w-full bg-gradient-to-t from-luxury-gold/20 via-luxury-gold/50 to-luxury-gold rounded-t-lg relative group-hover:brightness-125 transition-all"
+                                    >
+                                        <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-white text-luxury-black text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                            ${(day.revenue / 1000).toFixed(0)}k
+                                        </div>
+                                    </motion.div>
+                                    <span className="text-xs text-gray-500">
+                                        {day.date ? new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' }) : `Day ${i + 1}`}
+                                    </span>
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
 
@@ -149,28 +203,34 @@ const AdminDashboard = () => {
                         <button className="text-luxury-gold text-sm hover:underline">View All</button>
                     </div>
                     <div className="space-y-6">
-                        {orders.slice(0, 4).map((order, i) => (
-                            <div key={i} className="flex items-center justify-between group cursor-pointer">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-luxury-gold group-hover:bg-luxury-gold/10 transition-colors">
-                                        <Watch size={18} />
+                        {recentOrdersData.length === 0 ? (
+                            <p className="text-gray-500 text-center py-8">No recent orders</p>
+                        ) : (
+                            recentOrdersData.map((order, i) => (
+                                <div key={order.id || i} className="flex items-center justify-between group cursor-pointer">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-luxury-gold group-hover:bg-luxury-gold/10 transition-colors">
+                                            <Watch size={18} />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-medium text-white">{order.customerName}</p>
+                                            <p className="text-xs text-gray-500">
+                                                {order.items?.[0]?.name || 'Order'} • {new Date(order.date).toLocaleDateString()}
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="text-sm font-medium text-white">{order.customerName}</p>
-                                        <p className="text-xs text-gray-500">{order.items[0].name} • {new Date(order.date).toLocaleDateString()}</p>
+                                    <div className="text-right">
+                                        <p className="text-sm font-bold text-white">${(order.totalAmount || 0).toLocaleString()}</p>
+                                        <p className={`text-[10px] uppercase tracking-wider font-bold ${order.status === 'Delivered' ? 'text-green-400' :
+                                            order.status === 'Processing' ? 'text-amber-400' :
+                                                order.status === 'Shipped' ? 'text-blue-400' : 'text-gray-400'
+                                            }`}>
+                                            {order.status}
+                                        </p>
                                     </div>
                                 </div>
-                                <div className="text-right">
-                                    <p className="text-sm font-bold text-white">${(order.totalAmount || 0).toLocaleString()}</p>
-                                    <p className={`text-[10px] uppercase tracking-wider font-bold ${order.status === 'Delivered' ? 'text-green-400' :
-                                        order.status === 'Processing' ? 'text-amber-400' :
-                                            order.status === 'Shipped' ? 'text-blue-400' : 'text-gray-400'
-                                        }`}>
-                                        {order.status}
-                                    </p>
-                                </div>
-                            </div>
-                        ))}
+                            ))
+                        )}
                     </div>
                 </div>
             </div>

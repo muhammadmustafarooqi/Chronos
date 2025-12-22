@@ -36,10 +36,10 @@ import ProtectedRoute from './components/ProtectedRoute';
 function App() {
   return (
     <ThemeProvider>
-      <WatchProvider>
-        <OrderProvider>
-          <CustomerProvider>
-            <AuthProvider>
+      <AuthProvider>
+        <WatchProvider>
+          <OrderProvider>
+            <CustomerProvider>
               <CartProvider>
                 <WishlistProvider>
                   <Router>
@@ -91,10 +91,10 @@ function App() {
                   </Router>
                 </WishlistProvider>
               </CartProvider>
-            </AuthProvider>
-          </CustomerProvider>
-        </OrderProvider>
-      </WatchProvider>
+            </CustomerProvider>
+          </OrderProvider>
+        </WatchProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

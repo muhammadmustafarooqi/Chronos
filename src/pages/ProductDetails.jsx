@@ -23,7 +23,11 @@ const ProductDetails = () => {
     useEffect(() => {
         setLoading(true);
         window.scrollTo(0, 0);
-        const found = watches.find(w => w.id === parseInt(id));
+        // Support both MongoDB ObjectId (string) and numeric IDs from static data
+        const found = watches.find(w =>
+            String(w.id) === String(id) ||
+            String(w._id) === String(id)
+        );
         setProduct(found);
         setLoading(false);
         setQuantity(1);
@@ -41,7 +45,7 @@ const ProductDetails = () => {
 
     // Related products
     const relatedProducts = watches
-        .filter(w => w.id !== parseInt(id) && (w.brand === product?.brand || w.category === product?.category))
+        .filter(w => String(w.id || w._id) !== String(id) && (w.brand === product?.brand || w.category === product?.category))
         .slice(0, 4);
 
     if (loading) {

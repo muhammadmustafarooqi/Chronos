@@ -57,24 +57,24 @@ const Signup = () => {
         setIsLoading(true);
         setError('');
 
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 800));
+        try {
+            const result = await register({
+                name: `${formData.firstName} ${formData.lastName}`.trim(),
+                email: formData.email,
+                phone: formData.phone,
+                password: formData.password,
+            });
 
-        const result = register({
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            email: formData.email,
-            phone: formData.phone,
-            password: formData.password,
-        });
-
-        if (result.success) {
-            navigate('/account');
-        } else {
-            setError(result.message);
+            if (result.success) {
+                navigate('/account');
+            } else {
+                setError(result.message);
+            }
+        } catch (err) {
+            setError(err.message || 'Registration failed');
+        } finally {
+            setIsLoading(false);
         }
-
-        setIsLoading(false);
     };
 
     const passwordStrength = () => {

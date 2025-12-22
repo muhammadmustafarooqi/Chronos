@@ -11,7 +11,8 @@ const ProductCard = ({ product, index = 0 }) => {
     const [isAdded, setIsAdded] = useState(false);
     const [imageLoaded, setImageLoaded] = useState(false);
 
-    const isWishlisted = isInWishlist(product.id);
+    const productId = product._id || product.id;
+    const isWishlisted = isInWishlist(productId);
 
     const handleAddToCart = (e) => {
         e.preventDefault();
@@ -104,7 +105,7 @@ const ProductCard = ({ product, index = 0 }) => {
                             )}
                         </button>
                         <Link
-                            to={`/product/${product.id}`}
+                            to={`/product/${productId}`}
                             className="flex items-center justify-center p-3 bg-white/10 backdrop-blur-sm text-white hover:bg-white hover:text-luxury-black transition-all duration-300"
                         >
                             <Eye size={16} />
@@ -128,7 +129,7 @@ const ProductCard = ({ product, index = 0 }) => {
                         </span>
                     </div>
 
-                    <Link to={`/product/${product.id}`}>
+                    <Link to={`/product/${productId}`}>
                         <h3 className="text-lg font-serif text-white mb-3 group-hover:text-luxury-gold transition-colors duration-300 line-clamp-1">
                             {product.name}
                         </h3>
@@ -139,7 +140,7 @@ const ProductCard = ({ product, index = 0 }) => {
                             ${product.price.toLocaleString()}
                         </span>
                         <Link
-                            to={`/product/${product.id}`}
+                            to={`/product/${productId}`}
                             className="text-[10px] text-gray-500 uppercase tracking-wider hover:text-luxury-gold transition-colors hover-underline"
                         >
                             View Details

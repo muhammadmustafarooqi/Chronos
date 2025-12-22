@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { initialOrders } from '../data/adminData';
+import api from '../services/api';
+import { useAuth } from './AuthContext';
 
 const OrderContext = createContext();
 
@@ -10,31 +11,42 @@ export const useOrders = () => {
 };
 
 export const OrderProvider = ({ children }) => {
-    const [orders, setOrders] = useState(() => {
-        try {
-            const saved = localStorage.getItem('chronos-orders');
-            return saved ? JSON.parse(saved) : initialOrders;
-        } catch (err) {
-            console.error('Error loading orders from localStorage:', err);
-            return initialOrders;
-        }
-    });
+    const [orders, setOrders] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const { user, isAuthenticated, token } = useAuth();
 
-    // Save to localStorage when orders change
+    // Fetch orders when user logs in
     useEffect(() => {
-        localStorage.setItem('chronos-orders', JSON.stringify(orders));
-    }, [orders]);
+        const fetchOrders = async () => {
+            if (isAuthenticated && token) {
+                setLoading(true);
+                try {
+                    const response = await api.orders.getAll();
+                    setOrders(response.data.orders || []);
+                } catch (error) {
+                    console.error('Error fetching orders:', error);
+                    // Fallback to localStorage for offline support
+                    const saved = localStorage.getItem('chronos-orders');
+                    if (saved) {
+                        setOrders(JSON.parse(saved));
+                    }
+                } finally {
+                    setLoading(false);
+                }
+            }
+        };
+        fetchOrders();
+    }, [isAuthenticated, token]);
 
-    // Sync with other tabs
+    // Sync with other tabs for offline support
     useEffect(() => {
         const handleStorageChange = (e) => {
             if (e.key === 'chronos-orders') {
                 try {
-                    const newOrders = e.newValue ? JSON.parse(e.newValue) : initialOrders;
+                    const newOrders = e.newValue ? JSON.parse(e.newValue) : [];
                     setOrders(newOrders || []);
                 } catch (err) {
                     console.error('Error syncing orders:', err);
-                    setOrders(initialOrders);
                 }
             }
         };
@@ -43,23 +55,111 @@ export const OrderProvider = ({ children }) => {
         return () => window.removeEventListener('storage', handleStorageChange);
     }, []);
 
-    const updateOrderStatus = (orderId, newStatus) => {
-        setOrders(prev => prev.map(order =>
-            order.id === orderId ? { ...order, status: newStatus } : order
-        ));
+    const addOrder = async (orderData) => {
+        try {
+            const response = await api.orders.create(orderData);
+            const newOrder = response.data.order;
+            setOrders(prev => {
+                const updated = [newOrder, ...prev];
+                // Also save to localStorage as backup
+                localStorage.setItem('chronos-orders', JSON.stringify(updated));
+                return updated;
+            });
+            return { success: true, order: newOrder };
+        } catch (error) {
+            console.error('Error creating order:', error);
+            // Fallback: save to localStorage
+            const fallbackOrder = {
+                ...orderData,
+                id: orderData.id || `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+                date: new Date().toISOString(),
+                status: 'Pending'
+            };
+            setOrders(prev => {
+                const updated = [fallbackOrder, ...prev];
+                localStorage.setItem('chronos-orders', JSON.stringify(updated));
+                return updated;
+            });
+            return { success: true, order: fallbackOrder };
+        }
     };
 
-    const deleteOrder = (orderId) => {
-        setOrders(prev => prev.filter(order => order.id !== orderId));
+    const updateOrderStatus = async (orderId, newStatus) => {
+        try {
+            await api.orders.updateStatus(orderId, newStatus);
+            setOrders(prev => {
+                const updated = prev.map(order =>
+                    (order.id === orderId || order._id === orderId)
+                        ? { ...order, status: newStatus }
+                        : order
+                );
+                localStorage.setItem('chronos-orders', JSON.stringify(updated));
+                return updated;
+            });
+            return { success: true };
+        } catch (error) {
+            console.error('Error updating order:', error);
+            // Fallback to local update
+            setOrders(prev => {
+                const updated = prev.map(order =>
+                    (order.id === orderId || order._id === orderId)
+                        ? { ...order, status: newStatus }
+                        : order
+                );
+                localStorage.setItem('chronos-orders', JSON.stringify(updated));
+                return updated;
+            });
+            return { success: true };
+        }
     };
 
-    const addOrder = (order) => {
-        console.log('Adding new order to context:', order);
-        setOrders(prev => [order, ...prev]);
+    const deleteOrder = async (orderId) => {
+        try {
+            await api.orders.delete(orderId);
+            setOrders(prev => {
+                const updated = prev.filter(order =>
+                    order.id !== orderId && order._id !== orderId
+                );
+                localStorage.setItem('chronos-orders', JSON.stringify(updated));
+                return updated;
+            });
+            return { success: true };
+        } catch (error) {
+            console.error('Error deleting order:', error);
+            // Fallback to local delete
+            setOrders(prev => {
+                const updated = prev.filter(order =>
+                    order.id !== orderId && order._id !== orderId
+                );
+                localStorage.setItem('chronos-orders', JSON.stringify(updated));
+                return updated;
+            });
+            return { success: true };
+        }
+    };
+
+    const refreshOrders = async () => {
+        if (!isAuthenticated) return;
+        setLoading(true);
+        try {
+            const response = await api.orders.getAll();
+            setOrders(response.data.orders || []);
+        } catch (error) {
+            console.error('Error refreshing orders:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
-        <OrderContext.Provider value={{ orders, updateOrderStatus, deleteOrder, addOrder }}>
+        <OrderContext.Provider value={{
+            orders,
+            loading,
+            addOrder,
+            updateOrderStatus,
+            deleteOrder,
+            refreshOrders
+        }}>
             {children}
         </OrderContext.Provider>
     );

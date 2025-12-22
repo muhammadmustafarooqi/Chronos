@@ -115,7 +115,11 @@ const MyOrders = () => {
                                     <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
                                         <div className="flex items-center gap-3 text-sm text-gray-500">
                                             <Truck size={16} />
-                                            <span>Standard Shipping to {order.shippingAddress.split(',')[1]}</span>
+                                            <span>Standard Shipping to {
+                                                typeof order.shippingAddress === 'string'
+                                                    ? order.shippingAddress.split(',')[1] || order.shippingAddress
+                                                    : order.shippingAddress?.city || order.shippingAddressFormatted || 'Address'
+                                            }</span>
                                         </div>
                                         <button className="text-luxury-gold text-sm hover:underline font-medium">
                                             View Order Details

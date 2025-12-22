@@ -33,18 +33,19 @@ const Login = () => {
         setIsLoading(true);
         setError('');
 
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 800));
+        try {
+            const result = await login(formData.email, formData.password);
 
-        const result = login(formData.email, formData.password);
-
-        if (result.success) {
-            navigate('/account');
-        } else {
-            setError(result.message);
+            if (result.success) {
+                navigate('/account');
+            } else {
+                setError(result.message);
+            }
+        } catch (err) {
+            setError(err.message || 'Login failed');
+        } finally {
+            setIsLoading(false);
         }
-
-        setIsLoading(false);
     };
 
     return (

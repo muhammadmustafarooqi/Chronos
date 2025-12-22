@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../context/CartContext';
 import { useOrders } from '../context/OrderContext';
-import { useCustomers } from '../context/CustomerContext';
 import { useAuth } from '../context/AuthContext';
 import {
-    ChevronRight,
     Truck,
     MapPin,
     CreditCard,
@@ -19,10 +17,8 @@ import {
 } from 'lucide-react';
 
 const Checkout = () => {
-    const navigate = useNavigate();
     const { cart, cartTotal, clearCart } = useCart();
     const { addOrder } = useOrders();
-    const { addCustomer, customers } = useCustomers();
     const { user } = useAuth();
     const [step, setStep] = useState(1);
     const [isProcessing, setIsProcessing] = useState(false);
@@ -68,62 +64,54 @@ const Checkout = () => {
         window.scrollTo(0, 0);
     };
 
-    const handlePlaceOrder = () => {
+    const handlePlaceOrder = async () => {
         if (cart.length === 0) return;
         setIsProcessing(true);
 
-        // Simulate order processing
-        setTimeout(() => {
-            // Generate a more robust unique ID
-            const timestamp = Date.now();
-            const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-            const orderId = `ORD-${timestamp.toString().slice(-6)}-${random}`;
-
+        try {
             const customerName = `${shippingData.firstName} ${shippingData.lastName}`.trim() || 'Guest Customer';
 
-            // Save to OrderContext
-            const newOrder = {
-                id: orderId,
-                customerId: user?.id || `GUEST-${timestamp}`,
+            // Prepare order data for API
+            const orderData = {
                 customerName: customerName,
                 email: shippingData.email,
+                phone: shippingData.phone,
                 items: cart.map(item => ({
-                    id: item.id,
+                    id: item._id || item.id,
                     name: item.name,
                     quantity: item.quantity,
                     price: item.price,
                     image: item.images ? item.images[0] : (item.image || 'https://via.placeholder.com/150')
                 })),
                 totalAmount: cartTotal,
-                status: 'Pending',
-                date: new Date().toISOString(),
-                shippingAddress: `${shippingData.address}, ${shippingData.city}, ${shippingData.state} ${shippingData.zipCode}`.trim()
+                shippingAddress: {
+                    street: shippingData.address,
+                    apartment: shippingData.apartment,
+                    city: shippingData.city,
+                    state: shippingData.state,
+                    zipCode: shippingData.zipCode,
+                    country: shippingData.country
+                },
+                paymentMethod: paymentMethod
             };
 
-            console.log('Finalizing order:', newOrder);
-            addOrder(newOrder);
+            console.log('Creating order:', orderData);
 
-            // Add as customer in CustomerContext if not exists, otherwise update
-            const existingCustomer = customers.find(c => c.email.toLowerCase() === shippingData.email.toLowerCase());
-            if (!existingCustomer) {
-                addCustomer({
-                    id: user?.id || `CUST-${timestamp}`,
-                    name: customerName,
-                    email: shippingData.email,
-                    phone: shippingData.phone,
-                    joinedDate: new Date().toISOString().split('T')[0],
-                    totalOrders: 1,
-                    totalSpend: cartTotal,
-                    status: 'Active'
-                });
-            }
+            // Call API through OrderContext (which handles MongoDB and fallback)
+            const result = await addOrder(orderData);
+
+            const orderId = result?.order?.id || `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
             setOrderNumber(orderId);
             setIsProcessing(false);
             setOrderPlaced(true);
             clearCart();
             window.scrollTo({ top: 0, behavior: 'smooth' });
-        }, 1500);
+        } catch (error) {
+            console.error('Error placing order:', error);
+            setIsProcessing(false);
+            alert('There was an error placing your order. Please try again.');
+        }
     };
 
     // Empty cart check

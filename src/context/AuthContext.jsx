@@ -1,91 +1,85 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import api from '../services/api';
 
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(() => {
-        if (typeof window !== 'undefined') {
-            const saved = localStorage.getItem('chronos-user');
-            return saved ? JSON.parse(saved) : null;
-        }
-        return null;
-    });
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [token, setToken] = useState(() => localStorage.getItem('chronos-token'));
 
-    const [users, setUsers] = useState(() => {
-        if (typeof window !== 'undefined') {
-            const saved = localStorage.getItem('chronos-users');
-            return saved ? JSON.parse(saved) : [];
-        }
-        return [];
-    });
-
+    // Check if user is logged in on mount
     useEffect(() => {
-        if (user) {
-            localStorage.setItem('chronos-user', JSON.stringify(user));
-        } else {
-            localStorage.removeItem('chronos-user');
-        }
-    }, [user]);
-
-    useEffect(() => {
-        localStorage.setItem('chronos-users', JSON.stringify(users));
-    }, [users]);
-
-    const register = (userData) => {
-        // Check if email already exists
-        const existingUser = users.find(u => u.email === userData.email);
-        if (existingUser) {
-            return { success: false, message: 'Email already registered' };
-        }
-
-        const newUser = {
-            id: Date.now(),
-            ...userData,
-            createdAt: new Date().toISOString(),
+        const initAuth = async () => {
+            const savedToken = localStorage.getItem('chronos-token');
+            if (savedToken) {
+                try {
+                    const response = await api.auth.getMe();
+                    setUser(response.data.user);
+                } catch (error) {
+                    console.error('Auth init error:', error);
+                    localStorage.removeItem('chronos-token');
+                    setUser(null);
+                }
+            }
+            setLoading(false);
         };
+        initAuth();
+    }, []);
 
-        setUsers(prev => [...prev, newUser]);
-        setUser(newUser);
-        return { success: true, message: 'Registration successful' };
+    const register = async (userData) => {
+        try {
+            const response = await api.auth.register(userData);
+            const { user: newUser, token: newToken } = response.data;
+
+            localStorage.setItem('chronos-token', newToken);
+            setToken(newToken);
+            setUser(newUser);
+
+            return { success: true, message: 'Registration successful' };
+        } catch (error) {
+            return { success: false, message: error.message };
+        }
     };
 
-    const login = (email, password) => {
-        // Hardcoded admin check
-        if (email === 'admin@gmail.com' && password === 'Admin123@') {
-            const adminUser = {
-                id: 'admin',
-                name: 'System Admin',
-                email: 'admin@gmail.com',
-                role: 'admin',
-                isAdmin: true
-            };
-            setUser(adminUser);
-            return { success: true, message: 'Admin login successful' };
-        }
+    const login = async (email, password) => {
+        try {
+            const response = await api.auth.login(email, password);
+            const { user: loggedInUser, token: newToken } = response.data;
 
-        const foundUser = users.find(u => u.email === email && u.password === password);
-        if (foundUser) {
-            setUser({ ...foundUser, isAdmin: false });
-            return { success: true, message: 'Login successful' };
+            localStorage.setItem('chronos-token', newToken);
+            setToken(newToken);
+            setUser(loggedInUser);
+
+            return { success: true, message: response.message };
+        } catch (error) {
+            return { success: false, message: error.message };
         }
-        return { success: false, message: 'Invalid email or password' };
     };
 
     const logout = () => {
+        localStorage.removeItem('chronos-token');
+        setToken(null);
         setUser(null);
     };
 
-    const updateUser = (updatedData) => {
-        const updatedUser = { ...user, ...updatedData };
-        setUser(updatedUser);
-        setUsers(prev => prev.map(u => u.id === user.id ? updatedUser : u));
+    const updateUser = async (updatedData) => {
+        try {
+            const response = await api.auth.updateProfile(updatedData);
+            setUser(response.data.user);
+            return { success: true, message: 'Profile updated successfully' };
+        } catch (error) {
+            return { success: false, message: error.message };
+        }
     };
 
     return (
         <AuthContext.Provider value={{
             user,
+            token,
+            loading,
             isAuthenticated: !!user,
             register,
             login,

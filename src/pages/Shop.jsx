@@ -72,7 +72,7 @@ const Shop = () => {
         }
 
         return results;
-    }, [selectedCategory, selectedBrand, priceRange, sortBy]);
+    }, [watches, selectedCategory, selectedBrand, priceRange, sortBy]);
 
     const resetFilters = () => {
         setSelectedCategory('All');

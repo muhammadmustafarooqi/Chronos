@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { initialCustomers } from '../data/adminData';
+import api from '../services/api';
+import { useAuth } from './AuthContext';
 
 const CustomerContext = createContext();
 
@@ -10,25 +11,42 @@ export const useCustomers = () => {
 };
 
 export const CustomerProvider = ({ children }) => {
-    const [customers, setCustomers] = useState(() => {
-        const saved = localStorage.getItem('chronos-customers');
-        return saved ? JSON.parse(saved) : initialCustomers;
-    });
+    const [customers, setCustomers] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const { user, isAuthenticated, token } = useAuth();
 
+    // Fetch customers when admin logs in
     useEffect(() => {
-        localStorage.setItem('chronos-customers', JSON.stringify(customers));
-    }, [customers]);
+        const fetchCustomers = async () => {
+            if (isAuthenticated && user?.isAdmin && token) {
+                setLoading(true);
+                try {
+                    const response = await api.customers.getAll();
+                    setCustomers(response.data.customers || []);
+                } catch (error) {
+                    console.error('Error fetching customers:', error);
+                    // Fallback to localStorage
+                    const saved = localStorage.getItem('chronos-customers');
+                    if (saved) {
+                        setCustomers(JSON.parse(saved));
+                    }
+                } finally {
+                    setLoading(false);
+                }
+            }
+        };
+        fetchCustomers();
+    }, [isAuthenticated, user?.isAdmin, token]);
 
     // Sync with other tabs
     useEffect(() => {
         const handleStorageChange = (e) => {
             if (e.key === 'chronos-customers') {
                 try {
-                    const newCustomers = e.newValue ? JSON.parse(e.newValue) : initialCustomers;
+                    const newCustomers = e.newValue ? JSON.parse(e.newValue) : [];
                     setCustomers(newCustomers || []);
                 } catch (err) {
                     console.error('Error syncing customers:', err);
-                    setCustomers(initialCustomers);
                 }
             }
         };
@@ -37,18 +55,84 @@ export const CustomerProvider = ({ children }) => {
         return () => window.removeEventListener('storage', handleStorageChange);
     }, []);
 
-    const updateCustomerStatus = (customerId, newStatus) => {
-        setCustomers(prev => prev.map(customer =>
-            customer.id === customerId ? { ...customer, status: newStatus } : customer
-        ));
+    const updateCustomerStatus = async (customerId, newStatus) => {
+        try {
+            await api.customers.updateStatus(customerId, newStatus);
+            setCustomers(prev => {
+                const updated = prev.map(customer =>
+                    (customer.id === customerId || customer._id === customerId)
+                        ? { ...customer, status: newStatus }
+                        : customer
+                );
+                localStorage.setItem('chronos-customers', JSON.stringify(updated));
+                return updated;
+            });
+            return { success: true };
+        } catch (error) {
+            console.error('Error updating customer:', error);
+            // Fallback to local update
+            setCustomers(prev => {
+                const updated = prev.map(customer =>
+                    (customer.id === customerId || customer._id === customerId)
+                        ? { ...customer, status: newStatus }
+                        : customer
+                );
+                localStorage.setItem('chronos-customers', JSON.stringify(updated));
+                return updated;
+            });
+            return { success: true };
+        }
     };
 
-    const addCustomer = (customer) => {
-        setCustomers(prev => [customer, ...prev]);
+    const addCustomer = async (customer) => {
+        // Customer is auto-added when orders are created
+        // This is mainly for local state management
+        setCustomers(prev => {
+            const updated = [customer, ...prev];
+            localStorage.setItem('chronos-customers', JSON.stringify(updated));
+            return updated;
+        });
+    };
+
+    const deleteCustomer = async (customerId) => {
+        try {
+            await api.customers.delete(customerId);
+            setCustomers(prev => {
+                const updated = prev.filter(c =>
+                    c.id !== customerId && c._id !== customerId
+                );
+                localStorage.setItem('chronos-customers', JSON.stringify(updated));
+                return updated;
+            });
+            return { success: true };
+        } catch (error) {
+            console.error('Error deleting customer:', error);
+            return { success: false, message: error.message };
+        }
+    };
+
+    const refreshCustomers = async () => {
+        if (!user?.isAdmin) return;
+        setLoading(true);
+        try {
+            const response = await api.customers.getAll();
+            setCustomers(response.data.customers || []);
+        } catch (error) {
+            console.error('Error refreshing customers:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
-        <CustomerContext.Provider value={{ customers, updateCustomerStatus, addCustomer }}>
+        <CustomerContext.Provider value={{
+            customers,
+            loading,
+            updateCustomerStatus,
+            addCustomer,
+            deleteCustomer,
+            refreshCustomers
+        }}>
             {children}
         </CustomerContext.Provider>
     );

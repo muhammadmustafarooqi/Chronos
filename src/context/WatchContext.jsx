@@ -1,61 +1,130 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import api from '../services/api';
 import { watches as initialWatches } from '../data/watches';
 
 const WatchContext = createContext();
 
-export const useWatches = () => {
-    const context = useContext(WatchContext);
-    if (!context) {
-        throw new Error('useWatches must be used within a WatchProvider');
-    }
-    return context;
-};
+export const useWatches = () => useContext(WatchContext);
 
 export const WatchProvider = ({ children }) => {
-    const [watches, setWatches] = useState(() => {
-        const saved = localStorage.getItem('chronos-watches');
-        return saved ? JSON.parse(saved) : initialWatches;
-    });
+    const [watches, setWatches] = useState(initialWatches);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
+    // Fetch watches from API on mount
     useEffect(() => {
-        localStorage.setItem('chronos-watches', JSON.stringify(watches));
-    }, [watches]);
-
-    const addWatch = (newWatch) => {
-        const watchWithId = {
-            ...newWatch,
-            id: watches.length > 0 ? Math.max(...watches.map(w => w.id)) + 1 : 1
+        const fetchWatches = async () => {
+            try {
+                const response = await api.products.getAll({ limit: 100 });
+                if (response.data.products && response.data.products.length > 0) {
+                    // Map MongoDB _id to id for compatibility
+                    const mappedProducts = response.data.products.map(p => ({
+                        ...p,
+                        id: p._id || p.id
+                    }));
+                    setWatches(mappedProducts);
+                } else {
+                    // Use initial data if no products in DB
+                    setWatches(initialWatches);
+                }
+            } catch (err) {
+                console.error('Error fetching watches:', err);
+                // Fall back to initial data
+                setWatches(initialWatches);
+            } finally {
+                setLoading(false);
+            }
         };
-        setWatches(prev => [watchWithId, ...prev]);
+        fetchWatches();
+    }, []);
+
+    const addWatch = async (watchData) => {
+        try {
+            const response = await api.products.create({
+                ...watchData,
+                images: watchData.images || ['https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&q=80']
+            });
+            const newWatch = {
+                ...response.data.product,
+                id: response.data.product._id || response.data.product.id
+            };
+            setWatches(prev => [newWatch, ...prev]);
+            return { success: true, product: newWatch };
+        } catch (err) {
+            console.error('Error adding watch:', err);
+            // Fallback to local state if API fails
+            const newWatch = {
+                ...watchData,
+                id: Date.now(),
+                images: watchData.images || ['https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&q=80']
+            };
+            setWatches(prev => [newWatch, ...prev]);
+            return { success: true, product: newWatch };
+        }
     };
 
-    const updateWatch = (id, updatedWatch) => {
-        setWatches(prev => prev.map(w => w.id === id ? { ...updatedWatch, id } : w));
+    const updateWatch = async (id, updatedData) => {
+        try {
+            const response = await api.products.update(id, updatedData);
+            const updatedWatch = {
+                ...response.data.product,
+                id: response.data.product._id || response.data.product.id
+            };
+            setWatches(prev => prev.map(w =>
+                (w.id === id || w._id === id) ? updatedWatch : w
+            ));
+            return { success: true, product: updatedWatch };
+        } catch (err) {
+            console.error('Error updating watch:', err);
+            // Fallback to local state
+            setWatches(prev => prev.map(w =>
+                (w.id === id || w._id === id) ? { ...w, ...updatedData } : w
+            ));
+            return { success: true };
+        }
     };
 
-    const deleteWatch = (id) => {
-        setWatches(prev => prev.filter(w => w.id !== id));
+    const deleteWatch = async (id) => {
+        try {
+            await api.products.delete(id);
+            setWatches(prev => prev.filter(w => w.id !== id && w._id !== id));
+            return { success: true };
+        } catch (err) {
+            console.error('Error deleting watch:', err);
+            // Fallback to local state
+            setWatches(prev => prev.filter(w => w.id !== id && w._id !== id));
+            return { success: true };
+        }
+    };
+
+    const getWatchById = (id) => {
+        return watches.find(w => w.id === id || w._id === id || String(w.id) === String(id));
     };
 
     const getFeaturedWatches = () => watches.filter(w => w.isFeatured);
     const getNewArrivals = () => watches.filter(w => w.isNew);
-    const getWatchesByCategory = (category) =>
-        category === 'All' ? watches : watches.filter(w => w.category === category);
-    const getWatchesByBrand = (brand) =>
-        brand === 'All' ? watches : watches.filter(w => w.brand === brand);
-    const getCategories = () => ['All', ...new Set(watches.map(w => w.category))];
-    const getBrands = () => ['All', ...new Set(watches.map(w => w.brand))];
+
+    const getCategories = () => {
+        const cats = [...new Set(watches.map(w => w.category).filter(Boolean))];
+        return ['All', ...cats.sort()];
+    };
+
+    const getBrands = () => {
+        const brands = [...new Set(watches.map(w => w.brand).filter(Boolean))];
+        return ['All', ...brands.sort()];
+    };
 
     return (
         <WatchContext.Provider value={{
             watches,
+            loading,
+            error,
             addWatch,
             updateWatch,
             deleteWatch,
+            getWatchById,
             getFeaturedWatches,
             getNewArrivals,
-            getWatchesByCategory,
-            getWatchesByBrand,
             getCategories,
             getBrands
         }}>
