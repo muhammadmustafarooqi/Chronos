@@ -69,17 +69,22 @@ const Checkout = () => {
     };
 
     const handlePlaceOrder = () => {
+        if (cart.length === 0) return;
         setIsProcessing(true);
 
         // Simulate order processing
         setTimeout(() => {
-            const orderId = 'ORD-' + Date.now().toString().slice(-4);
+            // Generate a more robust unique ID
+            const timestamp = Date.now();
+            const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+            const orderId = `ORD-${timestamp.toString().slice(-6)}-${random}`;
+
             const customerName = `${shippingData.firstName} ${shippingData.lastName}`.trim() || 'Guest Customer';
 
             // Save to OrderContext
             const newOrder = {
                 id: orderId,
-                customerId: user?.id || Date.now(),
+                customerId: user?.id || `GUEST-${timestamp}`,
                 customerName: customerName,
                 email: shippingData.email,
                 items: cart.map(item => ({
@@ -87,21 +92,22 @@ const Checkout = () => {
                     name: item.name,
                     quantity: item.quantity,
                     price: item.price,
-                    image: item.images ? item.images[0] : item.image
+                    image: item.images ? item.images[0] : (item.image || 'https://via.placeholder.com/150')
                 })),
                 totalAmount: cartTotal,
                 status: 'Pending',
                 date: new Date().toISOString(),
-                shippingAddress: `${shippingData.address}, ${shippingData.city}, ${shippingData.state} ${shippingData.zipCode}`
+                shippingAddress: `${shippingData.address}, ${shippingData.city}, ${shippingData.state} ${shippingData.zipCode}`.trim()
             };
 
+            console.log('Finalizing order:', newOrder);
             addOrder(newOrder);
 
-            // Add as customer in CustomerContext if not exists
+            // Add as customer in CustomerContext if not exists, otherwise update
             const existingCustomer = customers.find(c => c.email.toLowerCase() === shippingData.email.toLowerCase());
             if (!existingCustomer) {
                 addCustomer({
-                    id: user?.id || Date.now(),
+                    id: user?.id || `CUST-${timestamp}`,
                     name: customerName,
                     email: shippingData.email,
                     phone: shippingData.phone,
@@ -116,8 +122,8 @@ const Checkout = () => {
             setIsProcessing(false);
             setOrderPlaced(true);
             clearCart();
-            window.scrollTo(0, 0);
-        }, 2000);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 1500);
     };
 
     // Empty cart check

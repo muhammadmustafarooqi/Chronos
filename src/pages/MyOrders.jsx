@@ -80,7 +80,7 @@ const MyOrders = () => {
                                         <div>
                                             <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">Total</p>
                                             <p className="text-luxury-gold font-bold text-sm">
-                                                ${order.totalAmount.toLocaleString()}
+                                                ${(order.totalAmount || 0).toLocaleString()}
                                             </p>
                                         </div>
                                     </div>

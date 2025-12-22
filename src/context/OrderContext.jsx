@@ -30,9 +30,11 @@ export const OrderProvider = ({ children }) => {
         const handleStorageChange = (e) => {
             if (e.key === 'chronos-orders') {
                 try {
-                    setOrders(JSON.parse(e.newValue));
+                    const newOrders = e.newValue ? JSON.parse(e.newValue) : initialOrders;
+                    setOrders(newOrders || []);
                 } catch (err) {
                     console.error('Error syncing orders:', err);
+                    setOrders(initialOrders);
                 }
             }
         };

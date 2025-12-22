@@ -7,7 +7,8 @@ import {
     Watch,
     TrendingUp,
     ArrowUpRight,
-    ArrowDownRight
+    ArrowDownRight,
+    Trash2
 } from 'lucide-react';
 import { useWatches } from '../../context/WatchContext';
 import { useOrders } from '../../context/OrderContext';
@@ -18,7 +19,7 @@ const AdminDashboard = () => {
     const { orders } = useOrders();
     const { customers } = useCustomers();
 
-    const totalRevenue = orders.reduce((sum, order) => sum + order.totalAmount, 0);
+    const totalRevenue = orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
     const totalOrders = orders.length;
     const totalCustomers = customers.length;
     const liveInventory = watches.length;
@@ -68,6 +69,18 @@ const AdminDashboard = () => {
                 <div className="flex gap-4">
                     <button className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg hover:border-luxury-gold/50 transition-colors">
                         Download Report
+                    </button>
+                    <button
+                        onClick={() => {
+                            if (window.confirm('This will clear all local orders, customers, and inventory. Are you sure?')) {
+                                localStorage.clear();
+                                window.location.reload();
+                            }
+                        }}
+                        className="px-4 py-2 bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg hover:bg-red-500/20 transition-colors flex items-center gap-2 text-xs"
+                    >
+                        <Trash2 size={14} />
+                        Clear System Cache
                     </button>
                     <button className="btn-primary py-2 px-6 rounded-lg text-xs">
                         Add New Watch
@@ -148,10 +161,10 @@ const AdminDashboard = () => {
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-sm font-bold text-white">${order.totalAmount.toLocaleString()}</p>
+                                    <p className="text-sm font-bold text-white">${(order.totalAmount || 0).toLocaleString()}</p>
                                     <p className={`text-[10px] uppercase tracking-wider font-bold ${order.status === 'Delivered' ? 'text-green-400' :
-                                            order.status === 'Processing' ? 'text-amber-400' :
-                                                order.status === 'Shipped' ? 'text-blue-400' : 'text-gray-400'
+                                        order.status === 'Processing' ? 'text-amber-400' :
+                                            order.status === 'Shipped' ? 'text-blue-400' : 'text-gray-400'
                                         }`}>
                                         {order.status}
                                     </p>

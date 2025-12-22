@@ -106,7 +106,7 @@ const AdminOrders = () => {
                                         {new Date(order.date).toLocaleDateString()}
                                     </td>
                                     <td className="px-6 py-4 text-sm font-bold text-white">
-                                        ${order.totalAmount.toLocaleString()}
+                                        ${(order.totalAmount || 0).toLocaleString()}
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border text-[10px] font-bold uppercase tracking-wider ${getStatusColor(order.status)}`}>
@@ -214,7 +214,7 @@ const AdminOrders = () => {
                                     </div>
                                     <div className="text-right">
                                         <h3 className="text-xs uppercase tracking-[0.2em] text-luxury-gold font-bold mb-1">Total Amount</h3>
-                                        <p className="text-3xl font-serif font-bold text-white">${selectedOrder.totalAmount.toLocaleString()}</p>
+                                        <p className="text-3xl font-serif font-bold text-white">${(selectedOrder.totalAmount || 0).toLocaleString()}</p>
                                     </div>
                                 </div>
                             </div>

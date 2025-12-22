@@ -19,6 +19,24 @@ export const CustomerProvider = ({ children }) => {
         localStorage.setItem('chronos-customers', JSON.stringify(customers));
     }, [customers]);
 
+    // Sync with other tabs
+    useEffect(() => {
+        const handleStorageChange = (e) => {
+            if (e.key === 'chronos-customers') {
+                try {
+                    const newCustomers = e.newValue ? JSON.parse(e.newValue) : initialCustomers;
+                    setCustomers(newCustomers || []);
+                } catch (err) {
+                    console.error('Error syncing customers:', err);
+                    setCustomers(initialCustomers);
+                }
+            }
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+        return () => window.removeEventListener('storage', handleStorageChange);
+    }, []);
+
     const updateCustomerStatus = (customerId, newStatus) => {
         setCustomers(prev => prev.map(customer =>
             customer.id === customerId ? { ...customer, status: newStatus } : customer
